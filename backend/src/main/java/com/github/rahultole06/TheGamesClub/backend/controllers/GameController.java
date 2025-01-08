@@ -22,18 +22,46 @@ public class GameController {
     this.gameService = gameService;
   }
 
+  /**
+   * Public api to create a game
+   * */
   public int createGame(String name, String description, User author, String genre, String year, File gameFile) {
     try {
       Game game;
+
+      /*
+       * This accounts for optional values
+       */
       if (description == null && genre == null) {
         game = new Game(name, author, year, null, null, 0);
+      } else if (description == null) {
+        game = new Game(name, author, genre, year, null, null, 0);
+      } else if (genre == null) {
+        game = new Game(name, description, author, year, null, null, 0);
+      } else {
+        game = new Game(name, description, author, genre, year, null, null, 0);
       }
+
       return gameService.createGame(game, gameFile);
     } catch (EntityExistsException | IOException e) {
       return -1;
     }
   }
 
+  /**
+   * Sends game file for downloading
+   * */
+  public File downloadGameFile(int gameId) {
+    try {
+      return gameService.downloadGameFile(gameId);
+    } catch (EntityNotFoundException | IOException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Returns game for accessing info
+   * */
   public Game getGameById(int id) {
     try {
       return gameService.getGameById(id);
@@ -42,14 +70,22 @@ public class GameController {
     }
   }
 
-  public int updateGame(Game game, File newGameFile) {
+  /**
+   * Updates game information
+   * */
+  public int updateGame(String newName, String newDesc, String newGenre, File newGameFile) {
     try {
-      return gameService.updateGame(game, newGameFile);
+      Game updateGame = new Game(newName, newDesc, null, newGenre, null, null, 0);
+      return gameService.updateGame(updateGame, newGameFile);
     } catch (EntityNotFoundException | IOException e) {
       return -1;
     }
   }
 
+
+  /**
+   * Delete a game
+   * */
   public int deleteGameById(int id) {
     try {
       return gameService.deleteGameById(id);

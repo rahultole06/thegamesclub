@@ -64,9 +64,11 @@ public class GameService {
     if (existingGame == null) {
       throw new EntityNotFoundException("Game not found");
     }
-    existingGame.setGameName(game.getGameName());
-    existingGame.setDescription(game.getDescription());
-    existingGame.setGenre(game.getGenre());
+
+    // Change current game's values based on input
+    existingGame.setGameName(game.getGameName() != null ? game.getGameName() : existingGame.getGameName());
+    existingGame.setDescription(game.getDescription() != null ? game.getDescription() : existingGame.getDescription());
+    existingGame.setGenre(game.getGenre() != null ? game.getGenre() : existingGame.getGenre());
 
     // Check if a new file is provided
     if (newGameFile != null) {
