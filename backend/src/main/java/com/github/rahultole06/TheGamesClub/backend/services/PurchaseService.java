@@ -22,11 +22,12 @@ public class PurchaseService {
   }
 
   @Transactional
-  public void createPurchase(Purchase purchase) {
+  public int createPurchase(Purchase purchase) {
     if (purchaseRepo.existsById(purchase.getId())) {
       throw new EntityExistsException("Purchase already exists");
     }
     purchaseRepo.save(purchase);
+    return 0;
   }
 
   @Transactional

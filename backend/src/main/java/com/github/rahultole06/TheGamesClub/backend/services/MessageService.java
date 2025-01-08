@@ -22,19 +22,21 @@ public class MessageService {
   }
 
   @Transactional
-  public void createMessage(Message message) {
+  public int createMessage(Message message) {
     if (messageRepo.existsById(message.getId())) {
       throw new EntityExistsException("Message already exists");
     }
     messageRepo.save(message);
+    return 0;
   }
 
   @Transactional
-  public void deleteMessage(Message message) {
-    if (!messageRepo.existsById(message.getId())) {
+  public int deleteMessage(int id) {
+    if (!messageRepo.existsById(id)) {
       throw new EntityNotFoundException("Message not found");
     }
-    messageRepo.deleteById(message.getId());
+    messageRepo.deleteById(id);
+    return 0;
   }
 
   @Transactional

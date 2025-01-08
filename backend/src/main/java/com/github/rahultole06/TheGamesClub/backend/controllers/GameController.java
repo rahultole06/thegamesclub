@@ -26,6 +26,7 @@ public class GameController {
    * Public api to create a game
    * */
   public int createGame(String name, String description, User author, String genre, String year, File gameFile) {
+    if (name == null || author == null || year == null || gameFile == null) { return -1; }
     try {
       Game game;
 
