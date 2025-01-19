@@ -20,9 +20,13 @@ import java.util.List;
 public class UserService {
 
   private final UserRepo userRepo;
+  private final GameService gameService;
+  private final MessageService messageService;
 
-  public UserService(UserRepo userRepo) {
+  public UserService(UserRepo userRepo, GameService gameService, MessageService messageService) {
     this.userRepo = userRepo;
+    this.gameService = gameService;
+    this.messageService = messageService;
   }
 
   @Transactional
@@ -35,41 +39,41 @@ public class UserService {
   }
 
   @Transactional
-  public int updateUser(User user, String oldPassword) {
-    User existingUser = userRepo.findByUsername(user.getUsername());
+  public int updateUser(int userId, String newUsername, String oldPassword, String newPassword) {
+    User existingUser = userRepo.findById(userId);
     if (existingUser == null) {
       throw new EntityNotFoundException("User not found");
     } else if (!existingUser.getPassword().equals(oldPassword)) {
       throw new IllegalArgumentException("Wrong password");
     }
-    existingUser.setUsername(user.getUsername());
-    existingUser.setPassword(user.getPassword());
+    existingUser.setUsername(newUsername);
+    existingUser.setPassword(newPassword);
     userRepo.save(existingUser);
     return 0;
   }
 
   @Transactional
-  public int deleteUser(String username, String password) {
-    if (!userRepo.existsByUsername(username)) {
+  public int deleteUser(int userId, String password) {
+    if (!userRepo.existsById(userId)) {
       throw new EntityNotFoundException("User not found");
-    } else if (!userRepo.findByUsername(username).getPassword().equals(password)) {
+    } else if (!userRepo.findById(userId).getPassword().equals(password)) {
       throw new IllegalArgumentException("Wrong password");
     }
-    userRepo.deleteByUsername(username);
+    userRepo.deleteById(userId);
     return 0;
   }
 
   @Transactional
-  public User getUserByUsername(String username) {
-    if (!userRepo.existsByUsername(username)) {
+  public User getUserById(int id) {
+    if (!userRepo.existsById(id)) {
       throw new EntityNotFoundException("User not found");
     }
-    return userRepo.findByUsername(username);
+    return userRepo.findById(id);
   }
 
   @Transactional
-  public List<Purchase> getUserPurchases(String username) {
-    User user = userRepo.findByUsername(username);
+  public List<Purchase> getUserPurchases(int id) {
+    User user = userRepo.findById(id);
     if (user == null) {
       throw new EntityNotFoundException("User not found");
     }
@@ -77,19 +81,21 @@ public class UserService {
   }
 
   @Transactional
-  public int buyGame(String username, Purchase purchase) {
-    User user = userRepo.findByUsername(username);
+  public int buyGame(int id, int gameId, int cost) {
+    User user = userRepo.findById(id);
     if (user == null) {
       throw new EntityNotFoundException("User not found");
     }
+    Game game = gameService.getGameById(gameId);
+    Purchase purchase = new Purchase(user, game, cost);
     user.buyGame(purchase);
     userRepo.save(user);
     return 0;
   }
 
   @Transactional
-  public List<Game> getUserGamesAuthored(String username) {
-    User user = userRepo.findByUsername(username);
+  public List<Game> getUserGamesAuthored(int id) {
+    User user = userRepo.findById(id);
     if (user == null) {
       throw new EntityNotFoundException("User not found");
     }
@@ -97,19 +103,20 @@ public class UserService {
   }
 
   @Transactional
-  public int addUserGamesAuthored(String username, Game game) {
-    User user = userRepo.findByUsername(username);
+  public int addUserGamesAuthored(int id, int gameId) {
+    User user = userRepo.findById(id);
     if (user == null) {
       throw new EntityNotFoundException("User not found");
     }
+    Game game = gameService.getGameById(gameId);
     user.addGameAuthored(game);
     userRepo.save(user);
     return 0;
   }
 
   @Transactional
-  public List<Message> getUserMessages(String username) {
-    User user = userRepo.findByUsername(username);
+  public List<Message> getUserMessages(int id) {
+    User user = userRepo.findById(id);
     if (user == null) {
       throw new EntityNotFoundException("User not found");
     }
@@ -117,11 +124,12 @@ public class UserService {
   }
 
   @Transactional
-  public int addUserMessages(String username, Message message) {
-    User user = userRepo.findByUsername(username);
+  public int addUserMessages(int id, int messageId) {
+    User user = userRepo.findById(id);
     if (user == null) {
       throw new EntityNotFoundException("User not found");
     }
+    Message message = messageService.getMessage(messageId);
     user.addMessage(message);
     userRepo.save(user);
     return 0;

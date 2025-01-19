@@ -1,7 +1,7 @@
 /**
  * Made by: Rahul M. Tole
  * Purpose: Public api for the user table
- * */
+ */
 
 package com.github.rahultole06.TheGamesClub.backend.controllers;
 
@@ -10,107 +10,98 @@ import com.github.rahultole06.TheGamesClub.backend.tables.Game;
 import com.github.rahultole06.TheGamesClub.backend.tables.Message;
 import com.github.rahultole06.TheGamesClub.backend.tables.Purchase;
 import com.github.rahultole06.TheGamesClub.backend.tables.User;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
 public class UserController {
-  private final UserService userService;
+	private final UserService userService;
 
-  public UserController(UserService userService) {
-    this.userService = userService;
-  }
+	public UserController(UserService userService) {
+		this.userService = userService;
+	}
 
-  public int createUser(String username, String password) {
-    if (username == null || password == null) { return -1; }
-    try {
-      User newUser = new User(username, password);
-      return userService.createUser(newUser);
-    } catch (EntityExistsException e) {
-      return -1;
-    }
-  }
+	@PostMapping("/users")
+	public int createUser(@RequestBody User user) {
+		return userService.createUser(user);
+	}
 
-  public int updateUser(String username, String oldPassword, String newPassword) {
-    if (username == null || oldPassword == null || newPassword == null) { return -1; }
-    try {
-      User newUser = new User(username, newPassword);
-      return userService.updateUser(newUser, oldPassword);
-    } catch (EntityNotFoundException | IllegalArgumentException e) {
-      return -1;
-    }
-  }
+	@PutMapping("/users/{id}")
+	public int updateUser(@PathVariable int id, String newUsername, String oldPassword, String newPassword) {
+		return userService.updateUser(id, newUsername, oldPassword, newPassword);
+	}
 
-  public int deleteUser(String username, String password) {
-    if (username == null || password == null) { return -1; }
-    try {
-      return userService.deleteUser(username, password);
-    } catch (EntityNotFoundException | IllegalArgumentException e) {
-      return -1;
-    }
-  }
+	@DeleteMapping("/users/{id}")
+	public int deleteUser(@PathVariable int id, String password) {
+		try {
+			return userService.deleteUser(id, password);
+		} catch (EntityNotFoundException | IllegalArgumentException e) {
+			return -1;
+		}
+	}
 
-  public User getUser(String username) {
-    if (username == null) { return null; }
-    try {
-      return userService.getUserByUsername(username);
-    } catch (EntityNotFoundException e) {
-      return null;
-    }
-  }
+	@GetMapping("/users/{id}")
+	public User getUser(@PathVariable int id) {
+		try {
+			return userService.getUserById(id);
+		} catch (EntityNotFoundException e) {
+			return null;
+		}
+	}
 
-  public List<Purchase> getUserPurchases(String username) {
-    if (username == null) { return null; }
-    try {
-      return userService.getUserPurchases(username);
-    } catch (EntityNotFoundException e) {
-      return null;
-    }
-  }
+	@GetMapping("/users/{id}/purchases")
+	public List<Purchase> getUserPurchases(@PathVariable int id) {
+		try {
+			return userService.getUserPurchases(id);
+		} catch (EntityNotFoundException e) {
+			return null;
+		}
+	}
 
-  public int buyGame(String username, Purchase purchase) {
-    if (username == null || purchase == null) { return -1; }
-    try {
-      return userService.buyGame(username, purchase);
-    } catch (EntityNotFoundException e) {
-      return -1;
-    }
-  }
+	@PostMapping("/users/{id}/purchases/{gameId}")
+	public int buyGame(@PathVariable int id, @PathVariable int gameId, int cost) {
+		try {
+			return userService.buyGame(id, gameId, cost);
+		} catch (EntityNotFoundException e) {
+			return -1;
+		}
+	}
 
-  public List<Game> getUserGamesAuthored(String username) {
-    if (username == null) { return null; }
-    try {
-      return userService.getUserGamesAuthored(username);
-    } catch (EntityNotFoundException e) {
-      return null;
-    }
-  }
+	@GetMapping("/users/{id}/authored")
+	public List<Game> getUserGamesAuthored(@PathVariable int id) {
+		try {
+			return userService.getUserGamesAuthored(id);
+		} catch (EntityNotFoundException e) {
+			return null;
+		}
+	}
 
-  public int addUserGamesAuthored(String username, Game game) {
-    if (username == null || game == null) { return -1; }
-    try {
-      return userService.addUserGamesAuthored(username, game);
-    } catch (EntityNotFoundException e) {
-      return -1;
-    }
-  }
+	@PostMapping("/users/{id}/authored/{gameId}")
+	public int addUserGamesAuthored(@PathVariable int id, @PathVariable int gameId) {
+		try {
+			return userService.addUserGamesAuthored(id, gameId);
+		} catch (EntityNotFoundException e) {
+			return -1;
+		}
+	}
 
-  public List<Message> getUserMessages(String username) {
-    if (username == null) { return null; }
-    try {
-      return userService.getUserMessages(username);
-    } catch (EntityNotFoundException e) {
-      return null;
-    }
-  }
+	@GetMapping("/users/{id}/messages")
+	public List<Message> getUserMessages(@PathVariable int id) {
+		try {
+			return userService.getUserMessages(id);
+		} catch (EntityNotFoundException e) {
+			return null;
+		}
+	}
 
-  public int addUserMessages(String username, Message message) {
-    if (username == null || message == null) { return -1; }
-    try {
-      return userService.addUserMessages(username, message);
-    } catch (EntityNotFoundException e) {
-      return -1;
-    }
-  }
+	@PostMapping("/users/{id}/messages/{messageId}")
+	public int addUserMessages(@PathVariable int id, @PathVariable int messageId) {
+		try {
+			return userService.addUserMessages(id, messageId);
+		} catch (EntityNotFoundException e) {
+			return -1;
+		}
+	}
 }
